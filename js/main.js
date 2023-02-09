@@ -39,4 +39,10 @@ function updateGame() {}
 
 function updateUI() {
   document.querySelector("#fps").innerHTML = gameData.fps;
+  document.querySelector("#btn-start-game").addEventListener("click", startGame);
+}
+
+function startGame() {
+  gameData.hasStarted = true;
+  console.log("Game starts!");
 }
