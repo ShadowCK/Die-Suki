@@ -41,9 +41,12 @@ export class Dice {
   handleSkill(type, ...params) {
     if (!this.listeners[type]) return;
 
-    for (const listener of this.listeners[type]) {
+    for (const listener in this.listeners[type]) {
       // Do not pass params in an array
       listener(...params);
     }
   }
 }
+
+//FIXME: test code remove later
+window.Dice = Dice;

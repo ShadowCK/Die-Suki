@@ -1,3 +1,5 @@
+import * as ui from "./ui.js";
+
 // ********** Metrics **********
 let deltaTime; // Time elapsed between frames
 let totalRunTime; // Time elapsed since startup
@@ -5,6 +7,8 @@ let previousTotalRunTime; // Time elapsed from startup to last frame
 let fps; // Frames per second
 let paused = false; // If paused, gameLoop (and most other tasks) will not be executed.
 let hasStarted = false;
+/** @type {ui.Info[]} */
+export const infos = [];
 
 /**
  * Haha
@@ -50,6 +54,9 @@ let gameData = {
   },
   set hasStarted(value) {
     hasStarted = value;
+  },
+  get infos() {
+    return infos;
   },
   temp,
 };

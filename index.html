@@ -14,25 +14,25 @@
     <script src="js/main.js" type="module"></script>
   </head>
   <body>
-    <header>
-      <h1>Dice Suki</h1>
-    </header>
     <main>
+      <header>
+        <h1 id="title" class="center">Dice Suki</h1>
+      </header>
       <section id="graphics">
         <div id="info-box">
-          <h2>Info</h2>
-          <div id="fps"></div>
-          <ul>
+          <h2 class="center">Info</h2>
+          <ul id="infos">
             <!-- Infos are generated here -->
           </ul>
         </div>
         <div id="game-scene">
+          <div id="fps" class="center"></div>
           <div id="enemy-dice"></div>
           <div id="player-dice"></div>
         </div>
       </section>
       <section id="inputs">
-        <button id="btn-start-game">Start</button>
+        <button class="button" id="btn-start-game">Start</button>
       </section>
     </main>
   </body>

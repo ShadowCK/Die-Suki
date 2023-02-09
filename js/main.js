@@ -1,6 +1,7 @@
 import * as ui from "./ui.js";
 import gameData from "./gameData.js";
 import * as utils from "./utils.js";
+import { Dice } from "./dice.js";
 
 window.addEventListener("load", init);
 
@@ -31,18 +32,13 @@ function gameLoop(realtimeSinceStartup) {
 
     // Main body of the update
     updateGame();
-    updateUI();
+    ui.update();
   }
 }
 
 function updateGame() {}
 
-function updateUI() {
-  document.querySelector("#fps").innerHTML = gameData.fps;
-  document.querySelector("#btn-start-game").addEventListener("click", startGame);
-}
-
-function startGame() {
+export function startGame() {
   gameData.hasStarted = true;
   console.log("Game starts!");
 }
