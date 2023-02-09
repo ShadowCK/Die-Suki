@@ -28,7 +28,7 @@ export class Dice {
     this.handleSkill("destroy", this);
   }
 
-  addEventListener(type, listener, identifier) {
+  addAbility(type, listener, identifier) {
     if (!this.listeners[type]) {
       this.listeners[type] = {};
     }
