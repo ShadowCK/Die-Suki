@@ -5,8 +5,13 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dice Suki</title>
-    <link rel="stylesheet" href="game.css" />
-    <script src="main.js"></script>
+    <link rel="stylesheet" href="css/game.css" />
+    <!-- External libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.5.0/math.js"></script>
+    <!-- My Scripts -->
+    <script src="js/main.js" type="module"></script>
   </head>
   <body>
     <header>
@@ -16,6 +21,7 @@
       <section id="graphics">
         <div id="info-box">
           <h2>Info</h2>
+          <div id="fps"></div>
           <ul>
             <!-- Infos are generated here -->
           </ul>
