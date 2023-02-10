@@ -712,7 +712,7 @@ Number.prototype.isInRange = function (min, max, includeMin = true, includeMax =
  * @param  {...any} ranges [min, max] or {min, max}, range is inclusive
  * @returns {number}
  */
-export function getRandomIndex(type = "combine", ...ranges) {
+export function getRandomIndex(abc, type = "combine", ...ranges) {
   // If ranges are arrays, convert them to objects
   ranges = ranges.map((range) => (range instanceof Array ? { min: range[0], max: range[1] } : range));
 
@@ -725,33 +725,89 @@ export function getRandomIndex(type = "combine", ...ranges) {
     }
   }
 
-  // Sorts out mins and maxs. Note that combine requires sort.
-  if (type === "sort" || type === "combine") {
-    // First, stores all mins and maxs in the `sorted` object literal
-    let sorted = ranges.reduce(
-      (accumulator, currentValue) => {
-        accumulator.mins.push(currentValue.min);
-        accumulator.maxs.push(currentValue.max);
-        return accumulator;
-      },
-      { mins: [], maxs: [] }
-    );
-    // Sorts mins and maxs from smallest to biggest
-    const smallToBig = (a, b) => a - b;
-    sorted.mins = sorted.mins.sort(smallToBig);
-    sorted.maxs = sorted.maxs.sort(smallToBig);
-    // Using stored values, rearranges `ranges` to the right order.
-    for (let i = 0; i < ranges.length; i++) {
-      ranges[i] = { min: sorted.mins[i], max: sorted.maxs[i] };
-    }
+  // Sorts the intervals using their minimums
+  if (type === "sort") {
+    ranges = ranges.sort((a, b) => a.min - b.min);
   }
 
-  // Combine overlapping ranges. Requires ranges to be sorted first.
-  if (type === "combine") {
-    for (let i = 0; i < ranges.length - 1; i++) {
-      if (ranges[i].max >= ranges[i + 1].min) {
-        ranges[i + 1].min = ranges.splice(i, 1)[0].min;
-        i--;
+  // Combine overlapping ranges/intervals. Requires ranges to be sorted first.
+  else if (type === "combine") {
+    switch (abc) {
+      case "a":
+        a();
+        break;
+      case "b":
+        b();
+        break;
+      case "c":
+        c();
+        break;
+    }
+
+    // * Interval Merge problem - Version A
+    //   1. sorts the minimum values and the maximum values of the intervals separately
+    //   2. uses these sorted arrays to recreate the intervals
+    //   3. by sorting the minimum and maximum values, the intervals are created in the correct order
+    //   4. compare the current minimum value with the previous maximum value to determine if they overlap
+    //  5a. If they do, merge the two intervals into a single interval
+    //  5b. If they do not overlap, add the current interval to the result set
+    // Note: the recreated intervals still capture all the minimum and maximum values of the original intervals.
+    // Note: That's why the union is the same as we directly do the union.
+    // Note: Easier to understand and provides a clear step-by-step process for merging the intervals.
+
+    function a() {
+      // Stores all mins and maxs and sorts them separately from smallest to biggest
+      const sorted = {
+        mins: ranges.map((r) => r.min).sort((a, b) => a - b),
+        maxs: ranges.map((r) => r.max).sort((a, b) => a - b),
+      };
+
+      // Using stored values, rearranges `ranges` to the right order.
+      ranges.forEach((r, i) => {
+        r.min = sorted.mins[i];
+        r.max = sorted.maxs[i];
+      });
+
+      // Compares previous maximum and current minimum; then combine intervals
+      for (let i = 0; i < ranges.length - 1; i++) {
+        if (ranges[i].max >= ranges[i + 1].min) {
+          ranges[i + 1].min = ranges[i].min;
+          ranges.splice(i--, 1);
+        }
+      }
+    }
+
+    // * Interval Merge problem - Version B
+    // 1. only sorts the minimum values
+    // 2. keeps track of the current interval using an index
+    // Note: More efficient in terms of time complexity. Faster for larger datasets.
+
+    function b() {
+      // Sorts the intervals using their minimums
+      ranges = ranges.sort((a, b) => a.min - b.min);
+      let result = [ranges[0]];
+      let i = 0;
+      for (const range of ranges) {
+        if (range.min <= result[i].max) {
+          result[i].max = Math.max(range.max, result[i].max);
+        } else {
+          result.push(range);
+          i = i + 1;
+        }
+      }
+      ranges = result;
+    }
+
+    // * Interval Merge problem - Version C
+    // Note: Has features of both verions. Shortest. May be a little harder to read.
+    function c() {
+      ranges = ranges.sort((a, b) => a.min - b.min);
+      for (let i = 0; i < ranges.length - 1; i++) {
+        if (ranges[i].max >= ranges[i + 1].min) {
+          ranges[i].max = Math.max(ranges[i].max, ranges[i + 1].max);
+          ranges.splice(i + 1, 1);
+          i--;
+        }
       }
     }
   }
