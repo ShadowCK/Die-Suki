@@ -25,6 +25,10 @@ export class Info {
   get isOff() {
     return this.timer >= this.duration;
   }
+
+  get timeLeft() {
+    return Math.max(0, this.duration - this.timer);
+  }
 }
 
 // FIXME: test only, remove later
@@ -48,6 +52,8 @@ function updateInfos() {
       info.element.parentElement.removeChild(info.element);
       gameData.infos.splice(i, 1);
       i--;
+    } else {
+      info.element.setInlineStyle({ opacity: info.timeLeft / info.duration });
     }
   }
 }

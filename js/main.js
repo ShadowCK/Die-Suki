@@ -39,6 +39,11 @@ function gameLoop(realtimeSinceStartup) {
 function updateGame() {}
 
 export function startGame() {
+  if (gameData.hasStarted) {
+    ui.addInfo(`You are already in game! (${new Date().toLocaleTimeString()})`, 2.5);
+    return;
+  }
+  ui.addInfo(`Game starts! (${new Date().toLocaleTimeString()})`, 10);
   gameData.hasStarted = true;
   console.log("Game starts!");
 }
