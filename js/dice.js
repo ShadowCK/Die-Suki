@@ -25,7 +25,6 @@ export class EventListener {
   }
 
   execute(...params) {
-    debugger;
     if (this.immediate) {
       this.listener.call(this.holder, ...params);
     } else {
@@ -111,7 +110,7 @@ export class Dice {
         listener.execute(...params);
       }
       if (typeof listener === "function") {
-        getListener(type, identifier).call(this, ...params);
+        listener.call(this, ...params);
       }
     }
   }
