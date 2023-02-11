@@ -5,13 +5,15 @@ const dices = [];
 const postponedListeners = [];
 
 export function handlePostponedEvents() {
-  for (const listener of postponedListeners) {
+  let listener;
+  while ((listener = postponedListeners.pop())) {
     listener();
   }
 }
 
 export function handleEvent(type, ...params) {
   for (const dice of dices) {
+    console.log(`handling ${type} event for ${dice}`);
     dice.handleEvent(type, ...params);
   }
   handlePostponedEvents();
@@ -24,6 +26,10 @@ export class EventListener {
     this.holder = holder;
   }
 
+  /**
+   * Executes the listener with given parameters (event metadata)
+   * @param  {...any} params
+   */
   execute(...params) {
     if (this.immediate) {
       this.listener.call(this.holder, ...params);
@@ -35,6 +41,12 @@ export class EventListener {
     }
   }
 
+  /**
+   * Allows EventListener to be called as a function via instance.call(), though it's still
+   * impossible to directly invoke an instance of a class in JavaScript as if it were a function
+   * @param {*} holder Temporarily replaces `this.holder` if not undefined
+   * @param  {...any} params
+   */
   call(holder, ...params) {
     // Calls the listener with the specified holder
     if (holder !== undefined) {
@@ -53,13 +65,15 @@ export class EventListener {
 }
 
 export class Dice {
-  static type = { champion: "champion", minion: "minion" };
-  constructor(type = Dice.type.minion, owner = null) {
+  static type = { champion: "Champion", minion: "Minion" };
+
+  constructor(name = utils.getRandomString(4, false, true, false), type = Dice.type.minion, owner = null) {
+    this.name = name;
     this.type = type;
     this.isHidden = false;
     this.isDestroyed = false;
     this.value = null;
-    this.maxValue = type === "champion" ? 10 : 6;
+    this.maxValue = type === Dice.type.champion ? 10 : 6;
     this.owner = owner;
     this.listeners = { roll: {}, reroll: {}, hide: {}, destroy: {} };
     dices.push(this);
@@ -93,12 +107,20 @@ export class Dice {
     handleEvent("destroy", this);
   }
 
-  addAbility(type, listener, identifier) {
+  addAbility(type, listener, { identifier = undefined, immediate = undefined } = {}) {
     if (!this.listeners[type]) {
       this.listeners[type] = {};
     }
     if (!identifier) {
       identifier = utils.getRandomString(16, false, true, false);
+    }
+    // Wraps given function as an EventListener
+    if (typeof listener === "function") {
+      listener = new EventListener(immediate, listener, this);
+    }
+    // If `listener` is neither a function nor an EventListener, throws an error.
+    else if (!(listener instanceof EventListener)) {
+      throw new Error(`Incorrect listener for addAbility() - ${listener}`);
     }
     this.listeners[type][identifier] = listener;
   }
@@ -111,18 +133,19 @@ export class Dice {
 
     for (const identifier in this.listeners[type]) {
       const listener = getListener(type, identifier);
-      // if (listener instanceof EventListener) {
-      //   listener.execute(...params);
-      // }
-      // else if (typeof listener === "function") {
-      //   listener.call(this, ...params);
-      // }
-
-      // * Small trick: EventListener also has a `call` function, but it may cause confusion!
-      if (listener instanceof EventListener || typeof listener === "function") {
+      if (listener instanceof EventListener) {
+        listener.execute(...params);
+      }
+      // Technically this wouldn't happen
+      else if (typeof listener === "function") {
         listener.call(this, ...params);
       }
     }
+  }
+
+  toString() {
+    console.log(this);
+    return `${this.type} dice "${this.name}" - owner: ${this.owner}`;
   }
 }
 
@@ -160,4 +183,6 @@ test.addAbility(
 );
 
 debugger;
+test.roll();
+
 test.roll();
