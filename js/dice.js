@@ -2,10 +2,48 @@ import * as utils from "./utils.js";
 
 /** @type {Dice[]} */
 const dices = [];
+const postponedListeners = [];
+
+export function handlePostponedEvents() {
+  for (const listener of postponedListeners) {
+    listener();
+  }
+}
 
 export function handleEvent(type, ...params) {
   for (const dice of dices) {
     dice.handleEvent(type, ...params);
+  }
+  handlePostponedEvents();
+}
+
+export class EventListener {
+  constructor(immediate = true, listener, holder = null) {
+    this.immediate = immediate;
+    this.listener = listener;
+    this.holder = holder;
+  }
+
+  execute(...params) {
+    debugger;
+    if (this.immediate) {
+      this.listener.call(this.holder, ...params);
+    } else {
+      postponedListeners.push(() => {
+        this.listener.call(this.holder, ...params);
+      });
+    }
+  }
+
+  call(holder, ...params) {
+    // If `holder` is `null`, call the listener with no "this"
+    if (holder === null) {
+      this.listener.call(null, ...params);
+    }
+    // Only uses bound holder if `holder` is `undefined`
+    else {
+      this.listener.call(holder || this.holder, ...params);
+    }
   }
 }
 
@@ -68,6 +106,10 @@ export class Dice {
 
     for (const identifier in this.listeners[type]) {
       const listener = getListener(type, identifier);
+      // * Small trick: EventListener also has a `call` function. But it may cause confusion!
+      if (listener instanceof EventListener) {
+        listener.execute(...params);
+      }
       if (typeof listener === "function") {
         getListener(type, identifier).call(this, ...params);
       }
@@ -83,6 +125,30 @@ test.addAbility("roll", function () {
   this.value += 100;
   console.log(`success: ${this.value}`);
 });
+
+test.addAbility(
+  "roll",
+  new EventListener(
+    true,
+    function () {
+      this.value *= 10;
+      console.log(`success: ${this.value}`);
+    },
+    test
+  )
+);
+
+test.addAbility(
+  "roll",
+  new EventListener(
+    false,
+    function () {
+      this.value *= -1;
+      console.log(`success: ${this.value}`);
+    },
+    test
+  )
+);
 
 debugger;
 test.roll();
