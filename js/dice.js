@@ -29,19 +29,25 @@ export class EventListener {
       this.listener.call(this.holder, ...params);
     } else {
       postponedListeners.push(() => {
+        console.log("postponed");
         this.listener.call(this.holder, ...params);
       });
     }
   }
 
   call(holder, ...params) {
-    // If `holder` is `null`, call the listener with no "this"
-    if (holder === null) {
-      this.listener.call(null, ...params);
+    // Calls the listener with the specified holder
+    if (holder !== undefined) {
+      /** This avoids changing the signature of execute() and all its existing
+          calls to accept an external holder as execute(holder, ...params)  */
+      const original = this.holder;
+      this.holder = holder;
+      this.execute(...params);
+      this.holder = original;
     }
-    // Only uses bound holder if `holder` is `undefined`
+    // Uses bound holder
     else {
-      this.listener.call(holder || this.holder, ...params);
+      this.execute(...params);
     }
   }
 }
@@ -105,11 +111,15 @@ export class Dice {
 
     for (const identifier in this.listeners[type]) {
       const listener = getListener(type, identifier);
-      // * Small trick: EventListener also has a `call` function. But it may cause confusion!
-      if (listener instanceof EventListener) {
-        listener.execute(...params);
-      }
-      if (typeof listener === "function") {
+      // if (listener instanceof EventListener) {
+      //   listener.execute(...params);
+      // }
+      // else if (typeof listener === "function") {
+      //   listener.call(this, ...params);
+      // }
+
+      // * Small trick: EventListener also has a `call` function, but it may cause confusion!
+      if (listener instanceof EventListener || typeof listener === "function") {
         listener.call(this, ...params);
       }
     }
