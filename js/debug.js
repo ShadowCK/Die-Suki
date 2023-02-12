@@ -8,7 +8,7 @@ export let debugLevel = 0;
  * @param {number} level Required debug level
  * @param {bool} isOnlyCurrent Whether to print debug message only when the two levels are exactly the same
  */
-export function log(text, level = 0, isOnlyCurrent = true) {
+export function log(text, level = 0, isOnlyCurrent = false) {
   let worked = false;
   if (!isOnlyCurrent) {
     if (debugLevel >= level) worked = true;

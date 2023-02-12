@@ -43,9 +43,6 @@ export class Info {
   }
 }
 
-// FIXME: test only, remove later
-window.addInfo = addInfo;
-
 export function addInfo(string, duration) {
   gameData.infos.push(new Info(string, duration));
 }
