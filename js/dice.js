@@ -3,7 +3,7 @@ import * as utils from "./utils.js";
 import { Player } from "./player.js";
 
 /** @type {Dice[]} */
-const dices = [];
+export const dices = [];
 const postponedListeners = [];
 
 export function handlePostponedEvents() {
@@ -72,6 +72,14 @@ export class Dice {
   static events = { roll: "roll", reroll: "reroll", hide: "hide", destroy: "destroy" };
 
   constructor(name = utils.getRandomString(4, false, true, false), type = Dice.type.minion, owner = null) {
+    // Copy constructor
+    if (arguments[0] instanceof Dice) {
+      const other = arguments[0];
+      this.uuid = utils.generateUUID();
+      utils.assign(this, other, ["uuid"]);
+      return this;
+    }
+    // New Dice
     this.name = name;
     this.uuid = utils.generateUUID();
     this.description = "No description for this dice.";
@@ -90,7 +98,6 @@ export class Dice {
       [Dice.events.hide]: {},
       [Dice.events.destroy]: {},
     };
-    dices.push(this);
   }
 
   addDescription(description) {
@@ -191,15 +198,34 @@ export class Dice {
   }
 }
 
-/** @type {Dice[]} */
-export const configs = [];
+export const configs = {
+  /** @type {Dice[]} */
+  champions: [],
+  /** @type {Dice[]} */
+  minions: [],
+  /** @type {Dice[]} */
+  all: [],
+};
+
+function addToConfig(...dices) {
+  for (const dice of dices) {
+    if (dice.type === Dice.type.champion) {
+      configs.champions.push(dice);
+    } else if (dice.type === Dice.type.minion) {
+      configs.minions.push(dice);
+    } else {
+      debug.log(`Failed to add ${dice} to configs - Invalid type "${dice.type}"`, 0);
+    }
+    configs.all.push(dice);
+  }
+}
 //#region Minions
-configs.push(
+addToConfig(
   new Dice("Warrior", Dice.type.minion)
     .addAbility(
       Dice.events.roll,
       function (dice, outcome) {
-        if (!isAlly(dice)) {
+        if (!this.isAlly(dice)) {
           dice.value = outcome - 1;
         }
       },
@@ -223,7 +249,8 @@ configs.push(
       function (dice) {
         if (this === dice) {
           this.isDestroyed = false;
-          this.value = (this.value / 2) | 0; // Shorter than Math.floor() to convert a float to int
+          // Shorter, and also faster than Math.floor() to convert a float to int
+          this.value = (this.value / 2) | 0;
         }
       },
       { immediate: true }
@@ -257,12 +284,12 @@ configs.push(
 //#endregion
 
 //#region Champions
-configs.push(
+addToConfig(
   new Dice("The King", Dice.type.champion)
     .addAbility(
       Dice.events.hide,
       function (dice) {
-        if (!isAlly(dice)) {
+        if (!this.isAlly(dice)) {
           this.minValue += 2;
           this.maxValue += 2;
           this.value = utils.getRandomInt(this.minValue, this.maxValue);
@@ -275,7 +302,7 @@ configs.push(
     .addAbility(
       Dice.events.roll,
       function (dice) {
-        if (isAlly(dice)) {
+        if (this.isAlly(dice)) {
           dice.value = utils.getRandomInt(dice.minValue, dice.maxValue + 4);
         }
       },
@@ -286,7 +313,7 @@ configs.push(
     .addAbility(
       Dice.events.roll,
       function (dice, source) {
-        if (isAlly(dice) && !isAlly(source)) {
+        if (this.isAlly(dice) && !this.isAlly(source)) {
           /** @type {Player} */
           const opponent = source.owner;
           const champions = opponent.champions.slice(0);

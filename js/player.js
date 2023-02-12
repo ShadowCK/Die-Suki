@@ -1,7 +1,8 @@
 import { Dice } from "./dice.js";
-import { getRandomString } from "./utils.js";
+import * as dice from "./dice.js";
+import { getRandomElement, getRandomString } from "./utils.js";
 
-const players = [];
+export const players = [];
 
 export function initPlayers() {
   // Creates Player objects for the player and computer
@@ -12,8 +13,14 @@ export function initPlayers() {
   // Sets up their next player
   players.forEach((element, index, array) => {
     element.nextPlayer = array[(index + 1) % array.length];
+    // * Random starting dices. Allows repetitive dices (temporarily)
+    // Adds two champions and four minions
+    const dices = [...getRandomElement(dice.configs.champions, 2), ...getRandomElement(dice.configs.minions, 4)].map(
+      (dice) => new Dice(dice)
+    );
+    debugger;
+    element.addDice(...dices);
   });
-  // TODO: Adds starting dices
 }
 
 export class Player {
@@ -21,15 +28,13 @@ export class Player {
    * @param {string} name
    * @param {Dice[]} dices It's a Dice array. Do not pass by spread syntax!
    */
-  constructor(name = getRandomString(4, false, true, false), dices) {
+  constructor(name = getRandomString(4, false, true, false), dices = []) {
     this.name = name;
     this.champions = [];
     this.minions = [];
     this.addDice(...dices);
 
     this.nextPlayer = null;
-
-    players.push(this);
   }
   get dices() {
     return this.champions.concat(this.minions);
@@ -43,16 +48,17 @@ export class Player {
    * @param  {...Dice} dices Do use spread syntax.
    */
   addDice(...dices) {
-    for (const dice of dices) {
-      if (dice.type === Dice.type.champion) {
-        this.champions.push(dice);
-      } else if (dice.type === Dice.type.minion) {
-        this.minions.push(dice);
+    for (const _dice of dices) {
+      if (_dice.type === Dice.type.champion) {
+        this.champions.push(_dice);
+      } else if (_dice.type === Dice.type.minion) {
+        this.minions.push(_dice);
       } else {
-        debug.log(`Failed to add ${dice} to ${this} - Invalid type "${dice.type}"`, 0);
+        debug.log(`Failed to add ${_dice} to ${this} - Invalid type "${_dice.type}"`, 0);
         return;
       }
-      dice.owner = this;
+      _dice.owner = this;
+      dice.dices.push(_dice);
     }
   }
 

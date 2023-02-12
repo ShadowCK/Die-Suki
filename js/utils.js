@@ -829,8 +829,18 @@ export function getRandomChar(fromIndex, toIndex) {
   return getRandomString(fromIndex, toIndex, 1);
 }
 
-export function getRandomElement(array) {
-  return array[Math.floor(Math.random() * array.length)];
+export function getRandomElement(array, count = 1) {
+  if (count < 1) return undefined;
+
+  if (count === 1) {
+    return array[(Math.random() * array.length) | 0];
+  } else {
+    const elements = Array(count);
+    for (let i = 0; i < count; i++) {
+      elements[i] = array[(Math.random() * array.length) | 0];
+    }
+    return elements;
+  }
 }
 
 export function romanize(num) {

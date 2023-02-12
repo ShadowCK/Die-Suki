@@ -1,10 +1,19 @@
 import { Dice, EventListener } from "./dice.js";
+import * as dice from "./dice.js";
+import * as utils from "./utils.js";
+
 import * as ui from "./ui.js";
 import * as debug from "./debug.js";
+import * as player from "./player.js";
 
 window.Dice = Dice;
+window.diceConfigs = dice.configs;
+window.utils = utils;
+
 window.addInfo = ui.addInfo;
+
 window.debug = debug;
+window.player = player;
 
 window.addEventListener("load", init);
 
