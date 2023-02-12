@@ -64,6 +64,11 @@ export class Info {
   }
 }
 
+/**
+ * Creates an info that disappears in `duration` seconds.
+ * @param {string} string String for the info
+ * @param {number} duration In seconds
+ */
 export function addInfo(string, duration) {
   gameData.infos.push(new Info(string, duration));
 }

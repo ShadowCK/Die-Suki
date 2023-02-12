@@ -1,6 +1,7 @@
 import * as debug from "./debug.js";
 import * as utils from "./utils.js";
 import { Player } from "./player.js";
+import { addInfo } from "./ui.js";
 
 /** @type {Dice[]} */
 export const dices = [];
@@ -15,18 +16,34 @@ export function handlePostponedEvents() {
 
 export function handleEvent(type, ...params) {
   for (const dice of dices) {
-    debug.log(`handling ${type} event for ${dice}`, 1);
-    debug.log(dice, 1);
+    debug.log(`${dice} handling ${type} event`, 1);
     dice.handleEvent(type, ...params);
   }
   handlePostponedEvents();
 }
 
 export class EventListener {
-  constructor(immediate = true, listener, holder = null) {
+  constructor(immediate = true, listener, holder, identifier, type) {
+    // Copy constructor
+    if (arguments[0] instanceof EventListener) {
+      utils.assign(this, arguments[0]);
+      // 2nd parameter would be the new holder
+      if (arguments[1]) {
+        this.holder = arguments[1];
+      }
+      return this;
+    }
+
     this.immediate = immediate;
     this.listener = listener;
     this.holder = holder;
+    this.identifier = identifier;
+    this.type = type;
+  }
+
+  setHolder(holder) {
+    this.holder = holder;
+    return this;
   }
 
   /**
@@ -75,8 +92,25 @@ export class Dice {
     // Copy constructor
     if (arguments[0] instanceof Dice) {
       const other = arguments[0];
+      utils.assign(this, other, ["uuid", "listeners"]);
+
       this.uuid = utils.generateUUID();
-      utils.assign(this, other, ["uuid"]);
+
+      this.listeners = {
+        [Dice.events.roll]: {},
+        [Dice.events.reroll]: {},
+        [Dice.events.hide]: {},
+        [Dice.events.destroy]: {},
+      };
+      for (const type of Object.keys(other.listeners)) {
+        for (const identifier of Object.keys(other.listeners[type])) {
+          let listener = other.listeners[type][identifier];
+          if (listener instanceof EventListener) {
+            listener = new EventListener(listener).setHolder(this);
+          }
+          this.addAbility(type, listener, { identifier: identifier });
+        }
+      }
       return this;
     }
     // New Dice
@@ -122,16 +156,26 @@ export class Dice {
     return outcome;
   }
 
+  // TODO: this is not complete
   hide() {
     this.isHidden = true;
-    // TODO
     handleEvent("hide", this);
   }
 
+  // TODO: this is not complete
   destroy(source) {
-    this.isDestroyed = true;
-    // TODO
-    handleEvent("destroy", this, source);
+    if (!source) {
+      throw Error(`"destroy" event must have a source! - in ${this}`);
+    }
+
+    if (!source instanceof Player || !source instanceof Dice) {
+      throw Error(`"destroy" event has an invalid source! - in ${this}`);
+    }
+
+    if (!this.isDestroyed) {
+      this.isDestroyed = true;
+      handleEvent("destroy", this, source);
+    }
   }
 
   disable() {
@@ -148,7 +192,7 @@ export class Dice {
     }
     // Wraps given function as an EventListener
     if (typeof listener === "function") {
-      listener = new EventListener(immediate, listener, this);
+      listener = new EventListener(immediate, listener, this, identifier, type);
     }
     // If `listener` is neither a function nor an EventListener, throws an error.
     else if (!(listener instanceof EventListener)) {
@@ -186,15 +230,21 @@ export class Dice {
   }
 
   /**
-   * @param {Dice} other
-   * @returns Whether `other` is `this` or an ally dice.
+   * @param {Dice | Player} other
+   * @returns Whether `other` is `this` or an ally dice or is the human player
    */
   isAlly(other) {
-    if (!this.owner) {
+    if (!this.owner || !other.owner) {
       return false;
     }
 
-    return this.owner.ownsDice(other);
+    if (other instanceof Player) {
+      return this.owner === other;
+    } else if (other instanceof Dice) {
+      return this.owner.ownsDice(other);
+    }
+
+    return false;
   }
 }
 
@@ -311,11 +361,11 @@ addToConfig(
     .addDescription("[On ally roll] Adds 4 to the outcome maximum"),
   new Dice("Knight", Dice.type.champion)
     .addAbility(
-      Dice.events.roll,
+      Dice.events.destroy,
       function (dice, source) {
         if (this.isAlly(dice) && !this.isAlly(source)) {
           /** @type {Player} */
-          const opponent = source.owner;
+          const opponent = source instanceof Player ? source : source.owner;
           const champions = opponent.champions.slice(0);
           let champion;
           while (
@@ -325,6 +375,7 @@ addToConfig(
             // Nothing needed here
           }
           champion.isDisabled = true;
+          addInfo(`${champion} is disabled by ${this}`, 60);
         }
       },
       { immediate: true }
