@@ -2,6 +2,7 @@ import { Dice } from "./dice.js";
 import * as dice from "./dice.js";
 import { getRandomElement, getRandomString } from "./utils.js";
 
+/** @type {Player[]} */
 export const players = [];
 
 export function initPlayers() {
@@ -18,7 +19,6 @@ export function initPlayers() {
     const dices = [...getRandomElement(dice.configs.champions, 2), ...getRandomElement(dice.configs.minions, 4)].map(
       (dice) => new Dice(dice)
     );
-    debugger;
     element.addDice(...dices);
   });
 }
@@ -77,5 +77,9 @@ export class Player {
 
   selectDice() {
     // TODO:
+  }
+
+  isHuman() {
+    return this.name.toLowerCase() === "you";
   }
 }

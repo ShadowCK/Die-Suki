@@ -50,4 +50,5 @@ export function startGame() {
   debug.log("Game starts!", 0);
 
   initPlayers();
+  ui.generateDices();
 }

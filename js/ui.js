@@ -1,6 +1,11 @@
 import * as debug from "./debug.js";
 import gameData from "./gameData.js";
 import * as main from "./main.js";
+import { Player, players } from "./player.js";
+import * as player from "./player.js";
+import { Dice } from "./dice.js";
+import * as dice from "./dice.js";
+import { setInnerHTML } from "./utils.js";
 
 let btnStartGame, inputDebugLevel, labelDebugLevel;
 
@@ -13,6 +18,20 @@ export function setupUI() {
   inputDebugLevel?.addEventListener("change", () => {
     debug.setLevel((labelDebugLevel.innerHTML = inputDebugLevel.value));
   });
+}
+
+export function generateDices() {
+  for (const player of players) {
+    let html = player.dices
+      .map((dice) => `<li><span class="dice-name">${dice.name}</span><span class="dice-value">0</span></li>`)
+      .join("")
+      .addTag("ol");
+    if (player.isHuman()) {
+      setInnerHTML(document.querySelector("#player-dices"), html);
+    } else {
+      setInnerHTML(document.querySelector("#enemy-dices"), html);
+    }
+  }
 }
 
 export class Info {
