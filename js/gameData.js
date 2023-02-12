@@ -10,13 +10,6 @@ let hasStarted = false;
 /** @type {ui.Info[]} */
 export const infos = [];
 
-/**
- * Haha
- */
-export function temp() {
-  console.log("haha!");
-}
-
 // Helper interface that makes the variables writable via setters
 let gameData = {
   get deltaTime() {
@@ -58,7 +51,6 @@ let gameData = {
   get infos() {
     return infos;
   },
-  temp,
 };
 
 // Note: `export default` must be after the declaration so that the value imported would stay the same

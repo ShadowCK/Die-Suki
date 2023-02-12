@@ -1,3 +1,4 @@
+import * as debug from "./debug.js";
 import * as utils from "./utils.js";
 
 /** @type {Dice[]} */
@@ -13,7 +14,7 @@ export function handlePostponedEvents() {
 
 export function handleEvent(type, ...params) {
   for (const dice of dices) {
-    console.log(`handling ${type} event for ${dice}`);
+    debug.log(`handling ${type} event for ${dice}`, 1);
     dice.handleEvent(type, ...params);
   }
   handlePostponedEvents();
@@ -35,7 +36,7 @@ export class EventListener {
       this.listener.call(this.holder, ...params);
     } else {
       postponedListeners.push(() => {
-        console.log("postponed");
+        debug.log("postponed", 1);
         this.listener.call(this.holder, ...params);
       });
     }
@@ -144,7 +145,7 @@ export class Dice {
   }
 
   toString() {
-    console.log(this);
+    debug.log(this, 1);
     return `${this.type} dice "${this.name}" - owner: ${this.owner}`;
   }
 }
@@ -155,7 +156,7 @@ window.Dice = Dice;
 let test = new Dice();
 test.addAbility("roll", function () {
   this.value += 100;
-  console.log(`success: ${this.value}`);
+  debug.log(`success: ${this.value}`, 1);
 });
 
 test.addAbility(
@@ -164,7 +165,7 @@ test.addAbility(
     true,
     function () {
       this.value *= 10;
-      console.log(`success: ${this.value}`);
+      debug.log(`success: ${this.value}`, 1);
     },
     test
   )
@@ -176,13 +177,12 @@ test.addAbility(
     false,
     function () {
       this.value *= -1;
-      console.log(`success: ${this.value}`);
+      debug.log(`success: ${this.value}`, 1);
     },
     test
   )
 );
 
-debugger;
 test.roll();
 
 test.roll();

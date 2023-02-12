@@ -1,7 +1,19 @@
+import * as debug from "./debug.js";
 import gameData from "./gameData.js";
 import * as main from "./main.js";
 
-export function setupUI() {}
+let btnStartGame, inputDebugLevel, labelDebugLevel;
+
+export function setupUI() {
+  btnStartGame = document.querySelector("#btn-start-game");
+  btnStartGame?.addEventListener("click", main.startGame);
+
+  inputDebugLevel = document.querySelector("#input-debug-level");
+  labelDebugLevel = document.querySelector("label[for='input-debug-level']");
+  inputDebugLevel?.addEventListener("change", () => {
+    debug.setLevel((labelDebugLevel.innerHTML = inputDebugLevel.value));
+  });
+}
 
 export class Info {
   constructor(string = "Unknown", duration = 1) {
@@ -40,7 +52,8 @@ export function addInfo(string, duration) {
 
 export function update() {
   document.querySelector("#fps").innerHTML = gameData.fps;
-  document.querySelector("#btn-start-game").addEventListener("click", main.startGame);
+  debug.setLevel((labelDebugLevel.innerHTML = inputDebugLevel.value));
+
   updateInfos();
 }
 

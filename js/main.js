@@ -2,13 +2,14 @@ import * as ui from "./ui.js";
 import gameData from "./gameData.js";
 import * as utils from "./utils.js";
 import { Dice } from "./dice.js";
+import * as debug from "./debug.js";
 
 window.addEventListener("load", init);
 
 function init() {
   ui.setupUI();
   gameLoop();
-  console.log(utils.StringParser.parseFormula("15+3*9"));
+  debug.log(utils.StringParser.parseFormula("15+3*9"), 0);
 }
 
 /**
@@ -45,5 +46,5 @@ export function startGame() {
   }
   ui.addInfo(`Game starts! (${new Date().toLocaleTimeString()})`, 10);
   gameData.hasStarted = true;
-  console.log("Game starts!");
+  debug.log("Game starts!", 0);
 }

@@ -1,3 +1,5 @@
+import * as debug from "./debug.js";
+
 /**
  * Returns a value between two others at a point on a linear scale
  * @param {number} start Start point / input value
@@ -515,9 +517,9 @@ export class StringParser {
     try {
       return math.evaluate(formula);
     } catch (e) {
-      console.log(`An error occurred while parsing formula ${formula} with filters:`);
-      console.log(filters);
-      console.log(`${e.name}: ${e.message}`);
+      debug.log(`An error occurred while parsing formula ${formula} with filters:`);
+      debug.log(filters);
+      debug.log(`${e.name}: ${e.message}`);
       console.trace();
       return null;
     }
@@ -616,8 +618,8 @@ EventTarget.prototype.hasEventListener = function (type) {
  * @param {HTMLElement} element
  */
 export function showEvents(element) {
-  console.log("Registered event listeners for element:");
-  console.log(element);
+  debug.log("Registered event listeners for element:", 0);
+  debug.log(element, 0);
   _showEvents(element.getEventListeners());
 }
 
@@ -627,9 +629,9 @@ export function showEvents(element) {
  */
 function _showEvents(events) {
   for (let event of Object.keys(events)) {
-    console.log(event + " ----------------> " + events[event].length);
+    debug.log(event + " ----------------> " + events[event].length, 0);
     for (let i = 0; i < events[event].length; i++) {
-      console.log(events[event][i].listener.toString());
+      debug.log(events[event][i].listener.toString(), 0);
     }
   }
 }
@@ -677,7 +679,7 @@ export function setInnerHTML(element, newHTML) {
 HTMLElement.prototype.setInlineStyle = function (styles) {
   // Not an object
   if (typeof styles !== "object") {
-    console.log(`Input styles "${styles}" is not a valid object literal or Map!`);
+    debug.log(`Input styles "${styles}" is not a valid object literal or Map!`, 0);
     return;
   }
   for (const [key, value] of Object.entries(styles)) {
@@ -712,7 +714,7 @@ Number.prototype.isInRange = function (min, max, includeMin = true, includeMax =
  * @param  {...any} ranges [min, max] or {min, max}, range is inclusive
  * @returns {number}
  */
-export function getRandomIndex(abc, type = "combine", ...ranges) {
+export function getRandomIndex(type = "combine", ...ranges) {
   // If ranges are arrays, convert them to objects
   ranges = ranges.map((range) => (range instanceof Array ? { min: range[0], max: range[1] } : range));
 
@@ -732,17 +734,7 @@ export function getRandomIndex(abc, type = "combine", ...ranges) {
 
   // Combine overlapping ranges/intervals. Requires ranges to be sorted first.
   else if (type === "combine") {
-    switch (abc) {
-      case "a":
-        a();
-        break;
-      case "b":
-        b();
-        break;
-      case "c":
-        c();
-        break;
-    }
+    c();
 
     // * Interval Merge problem - Version A
     //   1. sorts the minimum values and the maximum values of the intervals separately
@@ -835,4 +827,45 @@ export function getRandomIndex(abc, type = "combine", ...ranges) {
 
 export function getRandomChar(fromIndex, toIndex) {
   return getRandomString(fromIndex, toIndex, 1);
+}
+
+export function romanize(num) {
+  if (isNaN(num)) return NaN;
+  var digits = String(+num).split(""),
+    key = [
+      "",
+      "C",
+      "CC",
+      "CCC",
+      "CD",
+      "D",
+      "DC",
+      "DCC",
+      "DCCC",
+      "CM",
+      "",
+      "X",
+      "XX",
+      "XXX",
+      "XL",
+      "L",
+      "LX",
+      "LXX",
+      "LXXX",
+      "XC",
+      "",
+      "I",
+      "II",
+      "III",
+      "IV",
+      "V",
+      "VI",
+      "VII",
+      "VIII",
+      "IX",
+    ],
+    roman = "",
+    i = 3;
+  while (i--) roman = (key[+digits.pop() + i * 10] || "") + roman;
+  return Array(+digits.join("") + 1).join("M") + roman;
 }
