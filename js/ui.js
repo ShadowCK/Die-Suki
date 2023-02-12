@@ -22,17 +22,22 @@ export function setupUI() {
 
 export function generateDices() {
   for (const player of players) {
-    let html = player.dices
-      .map(
-        (dice) => `<li class="dice"><span class="dice-name">${dice.name}</span><span class="dice-value">?</span></li>`
-      )
-      .join("")
-      .addTag("ol");
-    if (player.isHuman()) {
-      setInnerHTML(document.querySelector("#player-dices"), html);
-    } else {
-      setInnerHTML(document.querySelector("#enemy-dices"), html);
-    }
+    const parent = document.createElement("ol");
+    (player.isHuman() ? document.querySelector("#player-dices") : document.querySelector("#enemy-dices")).appendChild(
+      parent
+    );
+    player.dices.forEach((dice) => {
+      let element = document.createElement(
+        "li",
+        {
+          class: "dice",
+          ["data-uuid"]: dice.uuid,
+        },
+        { innerHTML: `<span class="dice-name">${dice.name}</span><span class="dice-value">?</span>` }
+      );
+      dice.element = element;
+      parent.appendChild(element);
+    });
   }
 }
 
@@ -69,7 +74,7 @@ export class Info {
  * @param {string} string String for the info
  * @param {number} duration In seconds
  */
-export function addInfo(string, duration) {
+export function addInfo(string, duration = 600) {
   gameData.infos.push(new Info(string, duration));
 }
 

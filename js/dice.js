@@ -88,6 +88,14 @@ export class Dice {
   static type = { champion: "Champion", minion: "Minion" };
   static events = { roll: "roll", reroll: "reroll", hide: "hide", destroy: "destroy" };
 
+  element = null;
+  listeners = {
+    [Dice.events.roll]: {},
+    [Dice.events.reroll]: {},
+    [Dice.events.hide]: {},
+    [Dice.events.destroy]: {},
+  };
+
   constructor(name = utils.getRandomString(4, false, true, false), type = Dice.type.minion, owner = null) {
     // Copy constructor
     if (arguments[0] instanceof Dice) {
@@ -96,12 +104,6 @@ export class Dice {
 
       this.uuid = utils.generateUUID();
 
-      this.listeners = {
-        [Dice.events.roll]: {},
-        [Dice.events.reroll]: {},
-        [Dice.events.hide]: {},
-        [Dice.events.destroy]: {},
-      };
       for (const type of Object.keys(other.listeners)) {
         for (const identifier of Object.keys(other.listeners[type])) {
           let listener = other.listeners[type][identifier];
@@ -126,12 +128,6 @@ export class Dice {
     this.maxValue = type === Dice.type.champion ? 10 : 6;
     /** @type {Player} */
     this.owner = owner;
-    this.listeners = {
-      [Dice.events.roll]: {},
-      [Dice.events.reroll]: {},
-      [Dice.events.hide]: {},
-      [Dice.events.destroy]: {},
-    };
   }
 
   addDescription(description) {
@@ -276,7 +272,10 @@ addToConfig(
       Dice.events.roll,
       function (dice, outcome) {
         if (!this.isAlly(dice)) {
+          let original, newValue;
+          newValue = dice.value = (original = outcome) - 1;
           dice.value = outcome - 1;
+          addInfo(`${this.name} => ${dice.name} -1 (${original} => )`);
         }
       },
       { immediate: true }
@@ -375,7 +374,7 @@ addToConfig(
             // Nothing needed here
           }
           champion.isDisabled = true;
-          addInfo(`${champion} is disabled by ${this}`, 60);
+          addInfo(`${champion} is disabled by ${this}`);
         }
       },
       { immediate: true }
