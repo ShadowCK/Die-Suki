@@ -274,8 +274,7 @@ addToConfig(
         if (!this.isAlly(dice)) {
           let original, newValue;
           newValue = dice.value = (original = outcome) - 1;
-          dice.value = outcome - 1;
-          addInfo(`${this.name} => ${dice.name} -1 (${original} => )`);
+          addInfo(`${this.name} => ${dice.name} -1 (${original} => ${newValue})`);
         }
       },
       { immediate: true }
@@ -286,7 +285,9 @@ addToConfig(
       Dice.events.roll,
       function (dice, outcome) {
         if (this === dice) {
-          this.value = outcome + 1;
+          let original, newValue;
+          newValue = this.value = (original = outcome) + 1;
+          addInfo(`${this.name} +1 (${original} => ${newValue})`);
         }
       },
       { immediate: true }
@@ -298,8 +299,10 @@ addToConfig(
       function (dice) {
         if (this === dice) {
           this.isDestroyed = false;
-          // Shorter, and also faster than Math.floor() to convert a float to int
-          this.value = (this.value / 2) | 0;
+          let original, newValue;
+          // (number | 0) is Shorter, and also faster than Math.floor() to convert a float to int
+          newValue = this.value = ((original = this.value) / 2) | 0;
+          addInfo(`${this.name} avoided being destroyed, but /2. (${original} => ${newValue})`);
         }
       },
       { immediate: true }
@@ -313,6 +316,7 @@ addToConfig(
           if (outcome < previousRoll) {
             this.value = previousRoll;
           }
+          addInfo(`${this.name} rerolls with protection. (>= ${previousRoll}, ${previousRoll} => ${this.value})`);
         }
       },
       { immediate: true }
@@ -323,7 +327,9 @@ addToConfig(
       Dice.events.hide,
       function (dice) {
         if (this === dice) {
-          this.value += 2;
+          let original, newValue;
+          newValue = this.value = (original = this.value) + 2;
+          addInfo(`${this.name} +2 from "hide." (${original} => ${newValue})`);
         }
       },
       { immediate: true }
@@ -339,9 +345,10 @@ addToConfig(
       Dice.events.hide,
       function (dice) {
         if (!this.isAlly(dice)) {
-          this.minValue += 2;
-          this.maxValue += 2;
+          let original = [this.minValue, this.maxValue];
+          let newRange = [(this.minValue += 2), (this.maxValue += 2)];
           this.value = utils.getRandomInt(this.minValue, this.maxValue);
+          addInfo(`${this.name} rerolls with greater power. (${original} => ${newRange})`);
         }
       },
       { immediate: true }
@@ -351,8 +358,10 @@ addToConfig(
     .addAbility(
       Dice.events.roll,
       function (dice) {
-        if (this.isAlly(dice)) {
-          dice.value = utils.getRandomInt(dice.minValue, dice.maxValue + 4);
+        if (this.isAlly(dice) && this !== dice) {
+          const newRange = [dice.minValue, dice.maxValue + 4];
+          dice.value = utils.getRandomInt(...newRange);
+          addInfo(`${dice.name} rolls with ${this.name}'s bless. (${newRange} => ${dice.value})`);
         }
       },
       { immediate: true }
@@ -362,7 +371,7 @@ addToConfig(
     .addAbility(
       Dice.events.destroy,
       function (dice, source) {
-        if (this.isAlly(dice) && !this.isAlly(source)) {
+        if (this.isAlly(dice) && this !== dice && !this.isAlly(source)) {
           /** @type {Player} */
           const opponent = source instanceof Player ? source : source.owner;
           const champions = opponent.champions.slice(0);
@@ -374,7 +383,7 @@ addToConfig(
             // Nothing needed here
           }
           champion.isDisabled = true;
-          addInfo(`${champion} is disabled by ${this}`);
+          addInfo(`${champion.name} is disabled by ${this.name}`);
         }
       },
       { immediate: true }
