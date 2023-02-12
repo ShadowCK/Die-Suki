@@ -3,6 +3,7 @@ import gameData from "./gameData.js";
 import * as utils from "./utils.js";
 import { Dice } from "./dice.js";
 import * as debug from "./debug.js";
+import { initPlayers } from "./player.js";
 
 window.addEventListener("load", init);
 
@@ -47,4 +48,6 @@ export function startGame() {
   ui.addInfo(`Game starts! (${new Date().toLocaleTimeString()})`, 10);
   gameData.hasStarted = true;
   debug.log("Game starts!", 0);
+
+  initPlayers();
 }

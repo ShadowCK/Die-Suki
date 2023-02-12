@@ -829,6 +829,10 @@ export function getRandomChar(fromIndex, toIndex) {
   return getRandomString(fromIndex, toIndex, 1);
 }
 
+export function getRandomElement(array) {
+  return array[Math.floor(Math.random() * array.length)];
+}
+
 export function romanize(num) {
   if (isNaN(num)) return NaN;
   var digits = String(+num).split(""),
@@ -868,4 +872,13 @@ export function romanize(num) {
     i = 3;
   while (i--) roman = (key[+digits.pop() + i * 10] || "") + roman;
   return Array(+digits.join("") + 1).join("M") + roman;
+}
+
+// https://stackoverflow.com/questions/105034/how-do-i-create-a-guid-uuid
+export function generateUUID() {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+    let r = (Math.random() * 16) | 0,
+      v = c == "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
 }
