@@ -285,7 +285,7 @@ addToConfig(
 
 //#region Champions
 addToConfig(
-  new Dice("The King", Dice.type.champion)
+  new Dice("King", Dice.type.champion)
     .addAbility(
       Dice.events.hide,
       function (dice) {
@@ -298,7 +298,7 @@ addToConfig(
       { immediate: true }
     )
     .addDescription("[On enemy hide] Applies +2/+2 and rerolls this dice."),
-  new Dice("The Queen", Dice.type.champion)
+  new Dice("Queen", Dice.type.champion)
     .addAbility(
       Dice.events.roll,
       function (dice) {

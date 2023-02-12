@@ -7,6 +7,7 @@ import * as debug from "./debug.js";
 import * as player from "./player.js";
 
 window.Dice = Dice;
+window.dice = dice;
 window.diceConfigs = dice.configs;
 window.utils = utils;
 

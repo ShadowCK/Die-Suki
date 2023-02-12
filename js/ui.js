@@ -23,7 +23,9 @@ export function setupUI() {
 export function generateDices() {
   for (const player of players) {
     let html = player.dices
-      .map((dice) => `<li><span class="dice-name">${dice.name}</span><span class="dice-value">0</span></li>`)
+      .map(
+        (dice) => `<li class="dice"><span class="dice-name">${dice.name}</span><span class="dice-value">?</span></li>`
+      )
       .join("")
       .addTag("ol");
     if (player.isHuman()) {
